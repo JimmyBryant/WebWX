@@ -22,7 +22,7 @@
       "matches": [
           "*://*/*"
       ],
-      "js": ["js/content.js"],
+      "js": ["js/jquery.min.js","js/content.js"],
       "run_at": "document_end",
       "css": []
   }],
