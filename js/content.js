@@ -3,6 +3,12 @@ console.log('jquery加载了没',typeof jQuery);
 console.log('jquery加载了没',typeof $);
 (function () {
 
+
+	function reportIdkey(e, t, a) {
+		var n = "https://support.weixin.qq.com/cgi-bin/mmsupport-bin/reportforweb?rid=" + e + "&rkey=" + t + "&rvalue=" + (a || 1);
+		(new Image).src = n
+	};
+
 	function getDeviceID() {
 		return "e" + ("" + Math.random().toFixed(15)).substring(2, 17)
 	}
@@ -60,6 +66,8 @@ console.log('jquery加载了没',typeof $);
 			console.log(res.err);
 		}else if(res.data){
 			var blobUrl = res.data;
+			reportIdkey(63637,72,62);
+			reportIdkey(63637,76);
 			requestBlob(blobUrl,function(blob){
 				if(blob){
 					var xhr = new XMLHttpRequest();
