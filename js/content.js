@@ -2,7 +2,20 @@
 console.log('jquery加载了没',typeof jQuery);
 console.log('Cookie方法存在吗',typeof window.Cookies);
 (function () {
+	var avatar_src = $('.header>.avatar .img').attr('src')
+		,avatar_path = avatar_src.substring(avatar_src.lastIndexOf('?')+1)
+		;
 
+	function getParaFromPath(path){
+		var r = /([^&=\?]+)=?([^&]*)/g
+			,url=path
+			;
+		var a,b={};
+		while(a=r.exec(url)){
+			b[a[1]]=a[2];
+		}
+		return b;
+	}
 
 	function reportIdkey(e, t, a) {
 		var n = "https://support.weixin.qq.com/cgi-bin/mmsupport-bin/reportforweb?rid=" + e + "&rkey=" + t + "&rvalue=" + (a || 1);
@@ -34,9 +47,11 @@ console.log('Cookie方法存在吗',typeof window.Cookies);
 		var filename = "72635b6agy1fglwan3zeqj20go0m845p.jpg";
 		var date = new Date('Mon Jun 19 2017 20:59:12 GMT+0800 (中国标准时间)');
 		var type = blob.type;
+		var params = getParaFromPath(avatar_path);
+		var toUserName = $('.title_name.ng-binding').data('username');
 		var formData = new FormData();
 		var file = new File([blob], filename, {type: type, lastModified: date.valueOf()});
-		formData.append("id","WU_FILE_2");
+		formData.append("id","WU_FILE_0");
 		formData.append("name",file.name);
 		formData.append("type",file.type);
 		formData.append("lastModifiedDate",file.lastModifiedDate );
@@ -44,15 +59,21 @@ console.log('Cookie方法存在吗',typeof window.Cookies);
 		formData.append("mediatype","pic");
 		formData.append('uploadmediarequest','{"UploadType":2,"BaseRequest":{"Uin":1049656480,"Sid":"'
 		+Cookies.get('wxsid')
-		+'","Skey":"@crypt_a704984_26abef41f66573f7692859dbdd7161cd","DeviceID":'
+		+'","Skey":"'
+		+params.skey
+		+'","DeviceID":"'
 		+getDeviceID()
-		+'},"ClientMediaId":'
+		+'"},"ClientMediaId":'
 		+Date.now()
 		+',"TotalLen":'
 		+file.size
 		+',"StartPos":0,"DataLen":'
 		+file.size
-		+',"MediaType":4,"FromUserName":"@06dc4af1eb10db53d3f32a8e01b03172ad62447ed3a428a3a7d263a46f247a04","ToUserName":"@565cc1224ac17500bb96ff960a6fd04c5b708219c9a368ac7eb7ede3c306d809","FileMd5":"a6305de74fc95008373e14a86b551b1b"}');
+		+',"MediaType":4,"FromUserName":"'
+		+params.username
+		+'","ToUserName":'
+		+toUserName
+		+',"FileMd5":"a6305de74fc95008373e14a86b551b1b"}');
 		
 		formData.append('webwx_data_ticket',Cookies.get('webwx_data_ticket'));
 		formData.append('pass_ticket',"undefined");
@@ -67,7 +88,7 @@ console.log('Cookie方法存在吗',typeof window.Cookies);
 		}
 		xhr.send(formData);
 	}	
-	console.log("content.js开始执行");
+	
 	var src = "http://wx1.sinaimg.cn/mw690/72635b6agy1fglwan3zeqj20go0m845p.jpg";
 
 	chrome.runtime.sendMessage({method: 'downloadImg', url: src},function(res){
@@ -79,6 +100,7 @@ console.log('Cookie方法存在吗',typeof window.Cookies);
 			reportIdkey(63637,76);
 			requestBlob(blobUrl,function(blob){
 				if(blob){
+					console.log("获取到blob数据");
 					var xhr = new XMLHttpRequest();
 					xhr.open('options','https://file.wx.qq.com/cgi-bin/mmwebwx-bin/webwxuploadmedia?f=json');
 					xhr.send();
