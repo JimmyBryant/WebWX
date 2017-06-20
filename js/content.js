@@ -1,6 +1,6 @@
 'use strict';
 console.log('jquery加载了没',typeof jQuery);
-console.log('jquery加载了没',typeof $);
+console.log('Cookie方法存在吗',typeof window.Cookies);
 (function () {
 
 
@@ -32,20 +32,29 @@ console.log('jquery加载了没',typeof $);
 	function wx_uploadImage(blob){
 		var url = 'https://file.wx.qq.com/cgi-bin/mmwebwx-bin/webwxuploadmedia?f=json';
 		var filename = "72635b6agy1fglwan3zeqj20go0m845p.jpg";
-		var size = blob.size
-			,type = blob.type
-			;
+		var date = new Date('Mon Jun 19 2017 20:59:12 GMT+0800 (中国标准时间)');
+		var type = blob.type;
 		var formData = new FormData();
-		var file = new File([blob], filename, {type: type, lastModified: Date.now()});
-		formData.append("id","WU_FILE_0");
-		formData.append("name",filename);
-		formData.append("type",type);
-		formData.append("lastModifiedDate",new Date().toString());
-		formData.append("size",size);
+		var file = new File([blob], filename, {type: type, lastModified: date.valueOf()});
+		formData.append("id","WU_FILE_2");
+		formData.append("name",file.name);
+		formData.append("type",file.type);
+		formData.append("lastModifiedDate",file.lastModifiedDate );
+		formData.append("size",file.size);
 		formData.append("mediatype","pic");
-		formData.append('uploadmediarequest','{"UploadType":2,"BaseRequest":{"Uin":1049656480,"Sid":"i1JmEPSJq/+oYI/A","Skey":"@crypt_a704984_c3cae9762f97222924781e590bd69b14","DeviceID":'+getDeviceID()+'},"ClientMediaId":'+Date.now()+',"TotalLen":'+size+',"StartPos":0,"DataLen":'+size+',"MediaType":4,"FromUserName":"@438224a747b02f90b075c24d1a375bf294a9c7373a5e3d645fd5aed4e446ed1d","ToUserName":"@719237ca9093427212f1add4c91fdd648859506ac0924bf8b068ab8dadf35aee","FileMd5":"630fb39b576c03daaa6f63a161dc403c"}');
+		formData.append('uploadmediarequest','{"UploadType":2,"BaseRequest":{"Uin":1049656480,"Sid":"'
+		+Cookies.get('wxsid')
+		+'","Skey":"@crypt_a704984_26abef41f66573f7692859dbdd7161cd","DeviceID":'
+		+getDeviceID()
+		+'},"ClientMediaId":'
+		+Date.now()
+		+',"TotalLen":'
+		+file.size
+		+',"StartPos":0,"DataLen":'
+		+file.size
+		+',"MediaType":4,"FromUserName":"@06dc4af1eb10db53d3f32a8e01b03172ad62447ed3a428a3a7d263a46f247a04","ToUserName":"@565cc1224ac17500bb96ff960a6fd04c5b708219c9a368ac7eb7ede3c306d809","FileMd5":"a6305de74fc95008373e14a86b551b1b"}');
 		
-		formData.append('webwx_data_ticket','gSesW4T4QnVynCv1RLOgvIy0');
+		formData.append('webwx_data_ticket',Cookies.get('webwx_data_ticket'));
 		formData.append('pass_ticket',"undefined");
 		formData.append("filename",file);
 		var xhr = new XMLHttpRequest();
