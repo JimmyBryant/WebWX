@@ -26,6 +26,20 @@ console.log('Cookie方法存在吗',typeof window.Cookies);
 		return "e" + ("" + Math.random().toFixed(15)).substring(2, 17)
 	}
 
+	function getClientMsgId () {
+  		return (Date.now() + Math.random().toFixed(3)).replace('.', '')
+	}
+
+	function  getBaseRequest () {
+		var params = getParaFromPath(avatar_path);
+		return {
+			Uin: Cookies.get('wxuin'),
+			Sid: Cookies.get('wxsid'),
+			Skey: params.skey,
+			DeviceID: getDeviceID()
+		}
+	}
+
 	function requestBlob(url,callback){
 		var xhr = new XMLHttpRequest();
 		xhr.open('get',url,true);
@@ -44,40 +58,39 @@ console.log('Cookie方法存在吗',typeof window.Cookies);
 	//上传微信图片
 	function wx_uploadImage(blob){
 		var url = 'https://file.wx.qq.com/cgi-bin/mmwebwx-bin/webwxuploadmedia?f=json';
-		var filename = "72635b6agy1fglwan3zeqj20go0m845p.jpg";
+		var name = "72635b6agy1fglwan3zeqj20go0m845p.jpg";
 		var date = new Date('Mon Jun 19 2017 20:59:12 GMT+0800 (中国标准时间)');
-		var type = blob.type;
+		var type = blob.type
+			,size = blob.size
+			;
 		var params = getParaFromPath(avatar_path);
 		var toUserName = $('.title_name.ng-binding').data('username');
 		var formData = new FormData();
-		var file = new File([blob], filename, {type: type, lastModified: date.valueOf()});
+		var file = new File([blob], name, {type: type, lastModified: date.valueOf()});
+		var baseRequest = getBaseRequest();
 		formData.append("id","WU_FILE_0");
-		formData.append("name",file.name);
-		formData.append("type",file.type);
+		formData.append("name",name);
+		formData.append("type",type);
 		formData.append("lastModifiedDate",file.lastModifiedDate );
-		formData.append("size",file.size);
+		formData.append("size",size);
 		formData.append("mediatype","pic");
-		formData.append('uploadmediarequest','{"UploadType":2,"BaseRequest":{"Uin":1049656480,"Sid":"'
-		+Cookies.get('wxsid')
-		+'","Skey":"'
-		+params.skey
-		+'","DeviceID":"'
-		+getDeviceID()
-		+'"},"ClientMediaId":'
-		+Date.now()
-		+',"TotalLen":'
-		+file.size
-		+',"StartPos":0,"DataLen":'
-		+file.size
-		+',"MediaType":4,"FromUserName":"'
-		+params.username
-		+'","ToUserName":'
-		+toUserName
-		+',"FileMd5":"a6305de74fc95008373e14a86b551b1b"}');
+		formData.append('uploadmediarequest',JSON.stringify({
+			"UploadType":2,
+			"BaseRequest":baseRequest,
+			"ClientMediaId":getClientMsgId(),
+			"TotalLen":size,
+			"StartPos":0,
+			"DataLen":size,
+			"MediaType":4,
+			"FromUserName":params.username,
+			"ToUserName":toUserName
+		}
+		));
 		
 		formData.append('webwx_data_ticket',Cookies.get('webwx_data_ticket'));
 		formData.append('pass_ticket',"undefined");
 		formData.append("filename",file);
+		
 		var xhr = new XMLHttpRequest();
 		xhr.open('post',url);
 		xhr.onload = function(){

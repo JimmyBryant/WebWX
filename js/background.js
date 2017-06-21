@@ -25,8 +25,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
 });
 
-/*chrome.browserAction.onClicked.addListener(function(tab){
+chrome.browserAction.onClicked.addListener(function(tab){
      chrome.tabs.executeScript(tab.id, {file: 'js/jquery.min.js'});  
 	 chrome.tabs.executeScript(tab.id,{file:'js/cookie.js'});
      chrome.tabs.executeScript(tab.id, {file: 'js/content.js'});  
-});*/
+});
