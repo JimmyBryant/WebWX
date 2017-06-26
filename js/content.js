@@ -1,6 +1,5 @@
 'use strict';
-console.log('jquery加载了没',typeof jQuery);
-console.log('Cookie方法存在吗',typeof window.Cookies);
+
 (function () {
 	var CONF = {
 		API_webwxsendmsgimg:"https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsendmsgimg?fun=async&f=json",
