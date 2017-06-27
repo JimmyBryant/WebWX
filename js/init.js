@@ -33,6 +33,12 @@
             ;
         
         var util = {
+            getDeviceID:function() {
+                return "e" + ("" + Math.random().toFixed(15)).substring(2, 17)
+            },
+            getClientMsgId:function() {
+                return (Date.now() + Math.random().toFixed(3)).replace('.', '')
+            },
             request:function(method,url,data){
                 var d = data||null;
                 return new Promise(function(resolve,reject){
@@ -50,55 +56,86 @@
                 });
             },
             getBaseRequest:function () {
+                var _ = this;
                 return {
                     Uin: Cookies.get('wxuin'),
                     Sid: Cookies.get('wxsid'),
                     Skey: params.skey,
-                    DeviceID: getDeviceID()
+                    DeviceID: _.getDeviceID()
                 }
             }
         }
 
         /*
-        *   获取所有微信好友
-        *   @return {Promise} 返回relove promise
+        * 获取所有微信好友
+        * @return {Promise} 返回relove promise
         */
         function webwx_getContact(){
             let query = ["seq=0","r="+now,"lang=zh_CN","skey="+params.skey,"bitterg"];
             let url = WEBWX_EXTENSION_CONF.API_webwxgetcontact+"?"+query.join('&');
             return util.request('get',url).then(res=>{
                 let data = JSON.parse(res);
-                console.log(typeof data,data,data.MemberList.length);
                 if(data.MemberList.length){
                     MEMBERLIST = data.MemberList;
+                    var list = [];
                     MEMBERLIST.forEach(function(element) {
                         if(element.UserName.indexOf('@@')!=-1){
-                            GROUPLIST.push(element);
+                            list.push(element);
                         }
                     });
-                    console.log("获取到微信群了",GROUPLIST);
+                    return list;
+                }else{
+                    throw "获取微信好友失败";
                 }
 
             });
         }
 
-        // 获取群用户
-        function webwx_batchGetContact(){
-            let query = ["type=ex","r="+now,"lang=zh_CN"]
-            let url = WEBWX_EXTENSION_CONF.API_batchgetcontact+"?"+query.join("&");
-            var formData = new FormData();
-			var baseRequest = getBaseRequest();
-			formData.append("id","WU_FILE_0");
-			formData.append("name",name);
-            util.request('post',url,data).then(res=>{
-                console.log(res)
+        /*
+        * 批量获取群用户信息
+        * @param {Array} list [{EncryChatRoomId:'',UserName:''}]
+        * @return {Promise} 返回relove promise
+        */
+        function webwx_batchGetContact(list){
+            return Promise.resolve().then(()=>{
+                if(list.length){
+                    let groupList = [];
+                    list.forEach(function(element){
+                        groupList.push({EncryChatRoomId:element.EncryChatRoomId,UserName:element.UserName});
+                    });
+                    let count = list.length;
+                    let query = ["type=ex","r="+now,"lang=zh_CN"]
+                    let url = WEBWX_EXTENSION_CONF.API_batchgetcontact+"?"+query.join("&");
+                    let baseRequest = util.getBaseRequest();
+                    var data = {
+                        BaseRequest:baseRequest,
+                        Count:count,
+                        List:groupList
+                    };
+                    return util.request('post',url,JSON.stringify(data)).then(res=>{
+                        return res;
+                    })
+                    
+                }else{
+                    throw "list不能长度不能为0";
+                }
             });
-            
+
         }
 
 
         var start = function(){
-            webwx_getContact();
+            webwx_getContact().then(list=>{
+                console.log('这是群list',list);
+                return webwx_batchGetContact(list);
+            }).then(res=>{
+                var data = JSON.parse(res);
+                GROUPLIST = data.ContactList;
+                console.log('群数据',GROUPLIST);
+                // 将微信群数据保存到本地
+                // window.localStorage.groupList = JSON.stringify(data.ContactList);
+                return GROUPLIST;
+            });
         }
 
         start(); 
