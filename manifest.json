@@ -23,7 +23,7 @@
           "*://wx.qq.com/*"
       ],
       "js": ["js/jquery.min.js","js/cookie.js","js/init.js"],
-      "run_at": "document_end",
+      "run_at": "document_idle",
       "css": []
   }],
   "browser_action": {
